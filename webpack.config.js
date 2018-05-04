@@ -6,13 +6,19 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    entry: '../frontend/src/index.js',
+    entry: './client/index.js',
     devServer: {
-        contentBase: "../frontend/app/assets/",
+        contentBase: "./app/static/",
         quiet: false,
         noInfo: false,
         publicPath: "/",
-        stats: { colors: true }
+        stats: { colors: true },
+        hot: true,
+        filename: 'bundle.js',
+        historyApiFallback: true,
+        proxy: {
+            "*": "http://localhost:3000"
+        }
     },
     module: {
         rules: [
@@ -106,7 +112,7 @@ module.exports = {
     ],
     output: {
         filename: 'index.[hash:8].js',
-        path: path.resolve(__dirname, 'app/')
+        path: path.resolve(__dirname, 'app/static/')
     }
 };
 

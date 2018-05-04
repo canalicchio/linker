@@ -9,10 +9,9 @@ import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
 import index from './routes/index';
 import * as WebpackDevServer from 'webpack-dev-server';
-//import * as WebpackDevServer from 'webpack-dev-server';
-import * as WebpackDevServerMiddleWare from 'webpack-dev-middleware';
+// import * as WebpackDevServerMiddleWare from 'webpack-dev-middleware';
 import * as webpack from 'webpack';
-import * as config from '../../frontend/webpack.config.js';
+import * as config from '../webpack.config.js';
 
 console.log(config);
 
@@ -26,15 +25,23 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname,'../app/public')));
+
+app.use('/', express.static(path.join(__dirname,'../app/static')));
 
 app.use('/api/',index);
 
 
-
 if(process.env.NODE_ENV === 'development') {
-    app.use(WebpackDevServerMiddleWare(webpack(config), config.devServer));
-    app.use((err: Error,req,res,next) => {
+    //
+    // when in development mode we run a webpack server on port 3001 and
+    // all the express calls will be proxied through this server
+    //
+    const devPort = 3001;
+    let devServer = new WebpackDevServer(webpack(config), config.devServer);
+    devServer.listen(devPort, () => {
+        console.log('webpack-dev-server is listening on port', devPort);
+    });
+     app.use((err: Error,req,res,next) => {
         res.status(err['status'] || 500);
         res.render('error',{
             title: 'error',
