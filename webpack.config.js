@@ -6,7 +6,11 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    entry: './client/index.js',
+    entry: [
+        './client/index.js',
+        'webpack-dev-server/client?http://0.0.0.0:3001',
+        'webpack/hot/only-dev-server',
+    ],
     devServer: {
         contentBase: "./app/static/",
         quiet: false,
@@ -108,7 +112,7 @@ module.exports = {
             inject: true,
             template: path.resolve(__dirname, 'templates/index.html'),
         }),
-
+        new webpack.HotModuleReplacementPlugin(),
     ],
     output: {
         filename: 'index.[hash:8].js',
