@@ -4,3 +4,4 @@ server/app/**/*.js
 .DS_Store
 app/bin/*
 app/static/*
+app/**/*.js

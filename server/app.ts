@@ -1,7 +1,6 @@
 'use strict';
 
 import * as express from 'express';
-import * as proxy from 'proxy-middleware';
 import * as url from 'url';
 import * as path from 'path';
 import * as logger from 'morgan';
@@ -25,6 +24,13 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3001");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 app.use('/', express.static(path.join(__dirname,'../app/static')));
 

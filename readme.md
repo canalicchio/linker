@@ -28,6 +28,6 @@ npm run build
 
 run the server
 ```
-npm run build
+npm start
 ```
 
