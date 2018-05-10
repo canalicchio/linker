@@ -1,62 +1,132 @@
+body, html {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
 body {
     margin: 0;
     padding: 0;
     font-family: sans-serif;
     text-align: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
 }
-
-content {
+#root {
     display: block;
-    width: 500px;
-    margin: auto;
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
-.urlinput {
-    $button-width: 100px;
-    input {
-        box-sizing: border-box;
-        padding: 20px;
-        height: 60px;
-        border-radius: 3px;
-        border: 1px solid gray;
-        width: calc(100% - #{$button-width});
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-    button {
-        width: $button-width;
-        border: none;
-        background: black;
-        color: white;
-        border-radius: 3px;
-        box-sizing: border-box;
-        padding: 20px;
-        height: 60px;
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-    }
+.App {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
-
 .phonebox {
-    width: 375px;
-    height: 667px;
+    width: 100%;
+    height: 100%;
     border: 1px solid gray;
     overflow: hidden;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center center;
+    z-index: 1;
 }
-.interface {
-    position: relative;
+.menu-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background: yellow;
     display: flex;
-    flex-wrap: nowrap;
-    flex-direction: row;
-
+    align-items: center;
+    transition: top 0.3s ease-out;
+    z-index: 2;
+    &.active-submenu {
+        top: -50px;
+    }
 }
-.interface__toolbox {
+.menu-top__icons {
+    width: 100%;
+    text-align: center;
+    .fa {
+        font-size: 30px;
+        margin: 10px;
+    }
+}
 
+.menu-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    transition: bottom 0.3s ease-out;
+    z-index: 2;
+    &.active-submenu {
+        bottom: -50px;
+    }
+}
+.menu-bottom__inner {
+    width: 100%;
+    text-align: right;
+}
+.button {
+    border-radius: 20px;
+    padding: 10px 20px;
+    background: gray;
+    color: white;
+}
+.toggle {
+    display: inline-block;
+    .fa {
+        color: inherit;
+    }
+    &.active {
+        color: white;
+    }
+}
+
+.settings {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+    &.active {
+        visibility: visible;
+        opacity: 1;
+    }
+    .menu-top__inner {
+        width: 100%;
+        text-align: right;
+    }
+    &--text {
+        .menu-top {
+        }
+        input {
+            position: absolute;
+            background: white;
+            color: black;
+            z-index: 100;
+            width: 100%;
+        }
+    }
 }
 
 
+
+
+
+/// INPUT
 .input-range__slider {
     -webkit-appearance: none;
     -moz-appearance: none;
