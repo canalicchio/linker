@@ -1,0 +1,27 @@
+
+.urlinput {
+    $button-width: 100px;
+    input {
+        box-sizing: border-box;
+        padding: 20px;
+        height: 60px;
+        border-radius: 3px;
+        border: 1px solid gray;
+        width: calc(100% - #{$button-width});
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    button {
+        width: $button-width;
+        border: none;
+        background: black;
+        color: white;
+        border-radius: 3px;
+        box-sizing: border-box;
+        padding: 20px;
+        height: 60px;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+}
+

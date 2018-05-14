@@ -11,7 +11,7 @@ router.get('/',(req,res,next) => {
 });
 const imagesHandler = imagesUpload(
     './app/static/files',
-    'http://localhost:3000/files'
+    '/files'
 );
 router.post('/image',(req,res,next) => {
     imagesHandler(req, res);

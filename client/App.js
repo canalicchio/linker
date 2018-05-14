@@ -1,33 +1,67 @@
 import React, { Component } from 'react';
-import UrlInput from './UrlInput';
-import PhonePreview from './PhonePreview';
 
 import 'react-images-uploader/styles.css';
-import faStyles from 'font-awesome/css/font-awesome.css'
-import Toggle from './Toggle';
 
+import PhonePreview from './components/PhonePreview';
+import Toggle from './components/Toggle';
+import TextSettings from './components/TextSettings';
+import LinkSettings from './components/LinkSettings';
+import BackgroundSettings from './components/BackgroundSettings';
 
-import TextSettings from './TextSettings';
-import LinkSettings from './LinkSettings';
-import BackgroundSettings from './BackgroundSettings';
+import DraggableText from './components/DraggableText';
+
+import FA from '@fortawesome/react-fontawesome';
+
+import fontawesome from '@fortawesome/fontawesome';
+
+import faLink from '@fortawesome/fontawesome-free-solid/faLink';
+import faImage from '@fortawesome/fontawesome-free-solid/faImage';
+import faFont from '@fortawesome/fontawesome-free-solid/faFont';
+import faArrow from '@fortawesome/fontawesome-free-solid/faAngleRight';
+import faALeft from '@fortawesome/fontawesome-free-solid/faAlignLeft';
+import faACenter from '@fortawesome/fontawesome-free-solid/faAlignCenter';
+import faARight from '@fortawesome/fontawesome-free-solid/faAlignRight';
+import faATrash from '@fortawesome/fontawesome-free-solid/faTrashAlt';
+
+fontawesome.library.add(
+    faLink,
+    faImage,
+    faFont,
+    faArrow,
+    faALeft,
+    faACenter,
+    faARight,
+    faATrash
+);
+
+function trim(string) {
+    return String(string).replace(/^\s+|\s+$/g, '');
+}
+
+function guid() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
             backgroundColor: '#ffffff',
-            buttons: [],
+            texts: [],
             linkSettingsActive: false,
             backgroundSettingsActive: false,
             textSettingsActive: false,
-            currentText: 0,
+            selectedText: 0,
+            active: true,
         };
         this.setBackgroundImage = this.setBackgroundImage.bind(this);
         this.removeBackgroundImage = this.removeBackgroundImage.bind(this);
         this.setBackgroundColor = this.setBackgroundColor.bind(this);
-
-        this.handleButtonFontSize = this.handleButtonFontSize.bind(this);
-        this.handleButtonColorChange = this.handleButtonColorChange.bind(this);
 
         this.toggleLink = this.toggleLink.bind(this);
         this.toggleBackground = this.toggleBackground.bind(this);
@@ -37,7 +71,22 @@ class App extends Component {
         this.doneLinkSettings = this.doneLinkSettings.bind(this);
         this.doneBackgroundSettings = this.doneBackgroundSettings.bind(this);
 
-        this.onSelectText = this.onSelectText.bind(this);
+        this.textInput = React.createRef();
+
+    }
+    componentDidMount() {
+        document.querySelector('.rc-slider-handle').addEventListener('touchmove', function(ev){
+            ev.preventDefault();
+        });
+        document.querySelector('.rc-slider-track').addEventListener('touchmove', function(ev){
+            ev.preventDefault();
+        });
+        document.querySelector('.rc-slider-mark').addEventListener('touchmove', function(ev){
+            ev.preventDefault();
+        });
+        document.querySelector('.rc-slider-rail').addEventListener('touchmove', function(ev){
+            ev.preventDefault();
+        });
     }
     toggleLink() {
         console.log('toggleLink', !this.state.linkSettingsActive);
@@ -55,34 +104,64 @@ class App extends Component {
         });
     }
     toggleText() {
-        let i = this.state.buttons.length;
-        let buttons = this.state.buttons.concat([{text: 'new text'}]);
+        let texts = this.state.texts.concat([{
+            id: guid(),
+            editable: true,
+            style: 'classic',
+            fill: 'none',
+            align: 'center',
+            fontSize: 2.0,
+            color: '#000',
+            text: '',
+            x: Math.min(window.innerWidth, 375)/2,
+            y: Math.min(window.innerHeight, 667)/2,
+            scale: 1,
+            rotate: 0,
+        }]);
 
         this.setState({
             linkSettingsActive: false,
             backgroundSettingsActive: false,
-            textSettingsActive: !this.state.textSettingsActive,
-            buttons: buttons,
-            currentText: i,
+            textSettingsActive: true,
+            texts,
+            selectedText: texts.length - 1,
         });
+        this.textInput.current.focus();
     }
 
+
     activeMenu() {
-        return this.state.linkSettingsActive || this.state.backgroundSettingsActive || this.state.textSettingsActive;
+        return !this.state.active || (this.state.linkSettingsActive || this.state.backgroundSettingsActive || this.state.textSettingsActive);
     }
 
     doneTextSettings(newText) {
-        let buttons = this.state.buttons;
-        if(newText.text !== '') {
-            buttons[this.state.currentText].text = newText.text;
+        let texts = this.state.texts;
+        let i = this.state.selectedText;
+        if (trim(newText.text).length > 0) {
+            texts[i] = newText;
+            texts[i].editable = false;
+            texts = texts.concat();
         } else {
-            buttons.splice(this.state.currentText, 1);
+            texts.splice(i, 1);
+            texts = texts.concat();
         }
         this.setState({
             linkSettingsActive: false,
             backgroundSettingsActive: false,
             textSettingsActive: false,
-            buttons: buttons.concat(),
+            texts,
+            active: false,
+        });
+    }
+    deleteText(i) {
+        let texts = this.state.texts;
+        texts.splice(i, 1);
+        texts = texts.concat();
+        this.setState({
+            linkSettingsActive: false,
+            backgroundSettingsActive: false,
+            textSettingsActive: false,
+            texts,
         });
     }
     doneBackgroundSettings() {
@@ -90,10 +169,11 @@ class App extends Component {
             linkSettingsActive: false,
             backgroundSettingsActive: false,
             textSettingsActive: false,
+            active: false,
         });
     }
 
-    setBackgroundColor({hex}) {
+    setBackgroundColor(hex) {
         this.setState({
             backgroundColor: hex,
         });
@@ -116,54 +196,83 @@ class App extends Component {
             linkSettingsActive: false,
             backgroundSettingsActive: false,
             textSettingsActive: false,
+            active: false,
         });
     }
 
-    onSelectText(i) {
+    dragStop(data) {
+
+        let texts = this.state.texts;
+        let i = this.state.selectedText;
+        let txt = texts[i];
+
+        txt = {
+            ...txt,
+            x: data.x,
+            y: data.y,
+            scale: data.scale,
+            rotate: data.rotate,
+        };
+        texts[i] = txt;
+        texts = texts.concat();
+        this.setState({
+            texts,
+        });
+    }
+    selectText(i) {
         this.setState({
             linkSettingsActive: false,
             backgroundSettingsActive: false,
-            textSettingsActive: !this.state.textSettingsActive,
-            currentText: i,
+            textSettingsActive: true,
+            selectedText: i,
         });
-
-
+        this.textInput.current.focus();
     }
 
-    handleButtonColorChange({hex}) {
+    onDragStart(i) {
+
+        let texts = this.state.texts;
+        let txt = texts[i];
+        texts.splice(i, 1);
+        texts.push(txt);
         this.setState({
-            button: {
-                ...this.state.button,
-                backgroundColor: hex,
-            }
-        });
-    }
-    handleButtonFontSize(value) {
-        this.setState({
-            button: {
-                ...this.state.button,
-                fontSize: value,
-            }
+            texts: texts.concat(),
+            selectedText: texts.length-1,
         });
     }
 
 
     render() {
+        let texts = this.state.texts.map((txt, i) => {
+            return (
+                <DraggableText key={`txt_${txt.id}`} {...txt}
+                    onDragStart={() => {this.onDragStart(i);}}
+                    onDragStop={(text) => {this.dragStop(text)}}
+                    onDelete={() => {this.deleteText(i)}}
+                    onSelect={() => {this.selectText(i)}} />
+            );
+        });
         return (
             <div className="App">
                 <div className={`menu-top ${this.activeMenu() ? 'active-submenu' : ''}`}>
                     <div className={`menu-top__icons`}>
-                        <Toggle name="link" active={this.state.linkSettingsActive} onClick={this.toggleLink} />
-                        <Toggle name="image" active={this.state.backgroundSettingsActive} onClick={this.toggleBackground} />
-                        <Toggle name="font" active={this.state.textSettingsActive} onClick={this.toggleText} />
+                        <Toggle name="link" active={this.state.linkSettingsActive}
+                            onClick={this.toggleLink} />
+                        <Toggle name="image" active={this.state.backgroundSettingsActive}
+                            onClick={this.toggleBackground} />
+                        <Toggle name="font" active={this.state.textSettingsActive}
+                            onClick={this.toggleText} />
                     </div>
                 </div>
-                <PhonePreview {...this.state} onSelectText={this.onSelectText} />
-
+                <div className="texts">
+                    {texts}
+                </div>
+                <PhonePreview {...this.state} onClick={() => {this.setState({active: !this.state.active})}} />
                 <TextSettings
+                    internalRef={this.textInput}
+                    onDone={(text) => {this.doneTextSettings(text)}}
                     active={this.state.textSettingsActive}
-                    onDone={this.doneTextSettings}
-                    currentText={this.state.buttons[this.state.currentText]} />
+                    currentText={this.state.texts[this.state.selectedText]} />
                 <BackgroundSettings
                     active={this.state.backgroundSettingsActive}
                     onDone={this.doneBackgroundSettings}
@@ -174,7 +283,9 @@ class App extends Component {
                 <LinkSettings active={this.state.linkSettingsActive} onDone={this.doneLinkSettings} />
                 <div className={`menu-bottom ${this.activeMenu() ? 'active-submenu' : ''}`}>
                     <div className="menu-bottom__inner">
-                        <button className="button finish">Done</button>
+                        <button className="button finish">Publish
+                            <FA icon="angle-right" size="lg" />
+                        </button>
                     </div>
                 </div>
             </div>

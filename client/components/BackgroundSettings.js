@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 
-import { SliderPicker } from 'react-color';
 import ImagesUploader from 'react-images-uploader';
+import ColorPicker from './ColorPicker';
+import {colorPalette} from './ColorPicker';
 
 class BackgroundSettings extends Component {
     constructor(props) {
@@ -17,7 +18,8 @@ class BackgroundSettings extends Component {
 
     handleImageLoad(err, response) {
         if(err) {
-            this.props.removeImage();
+            console.log(err);
+            this.props.onDeleteImage();
         } else {
             this.props.onSetImage(response);
         }
@@ -28,6 +30,7 @@ class BackgroundSettings extends Component {
     }
 
     render() {
+        let palette = colorPalette(this.props.onSetBackgroundColor);
         return (
             <div className={`settings settings--background ${this.props.active ? 'active' : ''}`}>
                 <div className={`menu-top`}>
@@ -35,18 +38,20 @@ class BackgroundSettings extends Component {
                         <button className="done" onClick={this.done}>Done</button>
                     </div>
                 </div>
-                <div>
+                <div className="background-color">
+                    <label>Background color</label>
+                    <div>
+                        {palette}
+                    </div>
+                </div>
+                <div className="image-upload">
                     <ImagesUploader
-                        url="http://localhost:3000/api/image"
+                        url="/api/image"
                         optimisticPreviews
                         multiple={false}
                         onLoadEnd={this.handleImageLoad}
                         deleteImage={this.handleDeleteImage}
                         label="Upload a picture" />
-                </div>
-                <div>
-                    <label>Background color</label>
-                    <SliderPicker color={this.props.backgroundColor} onChangeComplete={ this.props.onSetBackgroundColor } />
                 </div>
             </div>
             );

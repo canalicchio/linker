@@ -69,7 +69,7 @@ export default function imagesUpload(
 							const { error, path } = saveFile(
 								tempPath,
 								localSavePath,
-								localServePath,
+                                '/',
 								fileName
 							);
 							if (error) {
@@ -96,7 +96,7 @@ export default function imagesUpload(
 					const { error, path } = saveFile(
 						tempPath,
 						localSavePath,
-						localServePath,
+                        servePath,
 						fileName
 					);
 					if (error) {
