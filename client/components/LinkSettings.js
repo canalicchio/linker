@@ -1,33 +1,36 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
-import { SliderPicker } from 'react-color';
-import ImagesUploader from 'react-images-uploader';
+import {
+    closeSettings,
+} from '../reducers/app';
 
 class LinkSettings extends Component {
-    constructor(props) {
-        super(props);
-
-        this.done = this.done.bind(this);
-    }
-    done() {
-        this.props.onDone();
-    }
     render() {
-    return (
-        <div className={`settings settings--link ${this.props.active ? 'active' : ''}`}>
-            <div className={`menu-top`}>
-                <div className="menu-top__inner">
-                    <button className="done" onClick={this.done}>Done</button>
+        return (
+            <div className={`settings settings--link ${this.props.linkSettingsActive ? 'active' : ''}`}>
+                <div className={`menu-top`}>
+                    <div className="menu-top__inner">
+                        <button className="done" onClick={this.props.closeSettings}>Done</button>
+                    </div>
+                </div>
+                <div>
+
                 </div>
             </div>
-            <div>
-
-            </div>
-        </div>
-    );
-  }
+        );
+    }
 }
 
-export default LinkSettings;
+const mapStateToProps = (state, ownProps) => {
+    return state;
+};
 
+const mapDispatchToProps = (dispatch, ownProps) => ({
+    closeSettings: () => {
+        dispatch(closeSettings());
+    },
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(LinkSettings);
 

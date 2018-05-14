@@ -61,58 +61,31 @@
             visibility: visible;
             opacity:1;
         }
-        .color-picker {
-            opacity:1;
-        }
-        .font-size {
-            visibility: visible;
-            opacity:1;
-        }
     }
 
-    textarea {
-        padding: 0;
-        min-width: 300px;
-        width: calc(100% - 10px);
-        padding: 10px;
-        outline: none;
-        border: none;
-        background: transparent;
-        color: black;
-        overflow: hidden;
-
-    }
     .textgroup {
         position: absolute;
         width: 100%;
         top: 35%;
         left: 0;
         transform: translate(0%, -50%);
-        .text {
-            z-index: 2;
-        }
         textarea {
-            z-index: 1;
+            padding: 0;
+            min-width: 300px;
+            width: calc(100% - 10px);
+            padding: 10px;
+            outline: none;
+            border: none;
+            background: transparent;
+            color: black;
+            overflow: hidden;
         }
-        &.editable {
-            textarea {
-                opacity: 1;
-                pointer-events: all;
-            }
-            .text {
-                opacity: 0;
-            }
-        }
-
     }
     .font-size {
-
         position: absolute;
         left: 0;
         top: 0;
         height: 100%;
-        visibility: hidden;
-        opacity: 0;
         transform: translateX(-18px);
         transition: transform 0.3s ease-out;
 
@@ -157,15 +130,6 @@
         bottom: 50px;
         width: 100%;
         left: 0;
-        opacity:0;
         transition: all 0.3s ease-out;
-    }
-    .animate {
-        .react-draggable {
-            transition: transform 0.3s ease-out;
-        }
-    }
-    .react-draggable {
-        background: red;
     }
 }

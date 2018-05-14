@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {DraggableCore} from 'react-draggable'; // Both at the same time
+import { connect } from 'react-redux';
+
 import Gesture from 'rc-hammerjs';
 import colorParse from 'color-parse';
 import FA from '@fortawesome/react-fontawesome';
@@ -25,6 +26,7 @@ class DraggableText extends Component {
         this.onDragStart = this.onDragStart.bind(this);
         this.onDrag = this.onDrag.bind(this);
         this.onDragStop = this.onDragStop.bind(this);
+
     }
 
     styleForText(txt) {
@@ -82,12 +84,12 @@ class DraggableText extends Component {
                 style.color = txt.color == '#fff' ? '#000' : '#fff';
                 style.backgroundColor = this.props.color;
                 style.padding = `4px 16px`;
-                style.boxShadow = `2px 2px 6px rgb(54, 54, 54)`;
+                style.boxShadow = `${this.props.device.tiltX}px ${-this.props.device.tiltY}px 6px rgb(54, 54, 54)`;
                 break;
             case 'text-shadow':
                 style.color = txt.color;
                 style.backgroundColor = 'transparent';
-                style.textShadow = `1px 1px 2px rgb(54, 54, 54)`;
+                style.textShadow = `${1+this.props.device.tiltX/2}px ${-3 - this.props.device.tiltY}px 2px rgb(54, 54, 54)`;
                 break;
         }
 
@@ -131,13 +133,13 @@ class DraggableText extends Component {
             }
         };
 
-        if( Math.abs(newX - halfx) < 5) {
+        if( Math.abs(newX - halfx) < 8) {
             newState.snapH = true;
             newState.position.x = halfx;
         } else {
             newState.snapH = false;
         }
-        if( Math.abs(newY - halfy) < 5) {
+        if( Math.abs(newY - halfy) < 8) {
             newState.snapV = true;
             newState.position.y = halfy;
         } else {
@@ -247,13 +249,13 @@ class DraggableText extends Component {
                             onRotateEnd={(gestureStatus) => { this.setState({'rotate': this.state.rotate+this.state._rotate, '_rotate': 0});}}
                             onPinch={(gestureStatus) => {console.log(gestureStatus); this.setState({'_scale': gestureStatus.scale}) }}
                             onPinchEnd={(gestureStatus) => { this.setState({'scale': this.state.scale*this.state._scale, '_scale':1}) }}>
-                                <div className={`text ${this.state.deleted ? 'deleted' : ''}`}
+                                <div className={`text ${this.state.deleted ? 'deleted' : ''} ${this.props.selected ? 'selected' : ''}`}
                                     ref={(el) => {this.element = el}}
                                     style={this.styleForText(txt)}>
                                     {rows.map((row,j) => (
                                         [<span key={`txt_row_${j}`} className="row" style={this.styleForRow(txt)}>{row}</span>,
                                         <br key={`br{j}`}/>]
-                                    ))}
+                                        ))}
                                 </div>
                         </Gesture>
                     </div>
@@ -267,5 +269,12 @@ class DraggableText extends Component {
   }
 }
 
-export default DraggableText;
+const mapStateToProps = (state, ownProps) => {
+    return state;
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(DraggableText);
 

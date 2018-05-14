@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import { connect } from 'react-redux';
 import 'react-images-uploader/styles.css';
 
 import PhonePreview from './components/PhonePreview';
@@ -7,12 +7,12 @@ import Toggle from './components/Toggle';
 import TextSettings from './components/TextSettings';
 import LinkSettings from './components/LinkSettings';
 import BackgroundSettings from './components/BackgroundSettings';
-
 import DraggableText from './components/DraggableText';
-
 import FA from '@fortawesome/react-fontawesome';
 
+import throttle from 'lodash.throttle';
 import fontawesome from '@fortawesome/fontawesome';
+
 
 import faLink from '@fortawesome/fontawesome-free-solid/faLink';
 import faImage from '@fortawesome/fontawesome-free-solid/faImage';
@@ -22,6 +22,30 @@ import faALeft from '@fortawesome/fontawesome-free-solid/faAlignLeft';
 import faACenter from '@fortawesome/fontawesome-free-solid/faAlignCenter';
 import faARight from '@fortawesome/fontawesome-free-solid/faAlignRight';
 import faATrash from '@fortawesome/fontawesome-free-solid/faTrashAlt';
+
+
+import {
+    openTextSettings,
+    openBackgroundSettings,
+    openLinkSettings,
+    closeSettings,
+    selectElement,
+} from './reducers/app';
+
+import {
+    tilt,
+} from './reducers/device';
+
+import {
+    addElement,
+    removeElement,
+    sortUp,
+} from './reducers/story';
+
+import {
+    updateElement,
+} from './reducers/element';
+
 
 fontawesome.library.add(
     faLink,
@@ -50,29 +74,40 @@ function guid() {
 class App extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            backgroundColor: '#ffffff',
-            texts: [],
-            linkSettingsActive: false,
-            backgroundSettingsActive: false,
-            textSettingsActive: false,
-            selectedText: 0,
-            active: true,
-        };
-        this.setBackgroundImage = this.setBackgroundImage.bind(this);
-        this.removeBackgroundImage = this.removeBackgroundImage.bind(this);
-        this.setBackgroundColor = this.setBackgroundColor.bind(this);
 
-        this.toggleLink = this.toggleLink.bind(this);
-        this.toggleBackground = this.toggleBackground.bind(this);
+        this.state = {
+            story: {
+                backgroundColor: '#ffffff',
+                backgroundImage: null,
+                elements: [],
+            },
+            app: {
+                linkSettingsActive: false,
+                backgroundSettingsActive: false,
+                textSettingsActive: false,
+                showMenu: true,
+                selectedElement: null,
+            },
+            device: {
+                tiltX: 0,
+                tiltY: 0,
+            }
+        };
         this.toggleText = this.toggleText.bind(this);
+        this.editText = this.editText.bind(this);
 
         this.doneTextSettings = this.doneTextSettings.bind(this);
-        this.doneLinkSettings = this.doneLinkSettings.bind(this);
-        this.doneBackgroundSettings = this.doneBackgroundSettings.bind(this);
 
         this.textInput = React.createRef();
 
+
+        this.tilt = throttle((event) => {
+            if(this.state.textSettingsActive == false && event.accelerationIncludingGravity) {
+                let x = parseFloat(event.accelerationIncludingGravity.x);
+                let y = parseFloat(event.accelerationIncludingGravity.y);
+                this.props.tilt(( this.state.tiltX + x ) / 2, (this.state.tiltY + y ) / 2);
+            }
+        }, 20);
     }
     componentDidMount() {
         document.querySelector('.rc-slider-handle').addEventListener('touchmove', function(ev){
@@ -87,24 +122,12 @@ class App extends Component {
         document.querySelector('.rc-slider-rail').addEventListener('touchmove', function(ev){
             ev.preventDefault();
         });
+
+        window.addEventListener('devicemotion', this.tilt, true);
     }
-    toggleLink() {
-        console.log('toggleLink', !this.state.linkSettingsActive);
-        this.setState({
-            linkSettingsActive: !this.state.linkSettingsActive,
-            backgroundSettingsActive: false,
-            textSettingsActive: false,
-        });
-    }
-    toggleBackground() {
-        this.setState({
-            linkSettingsActive: false,
-            backgroundSettingsActive: !this.state.backgroundSettingsActive,
-            textSettingsActive: false,
-        });
-    }
+
     toggleText() {
-        let texts = this.state.texts.concat([{
+        let newElement = {
             id: guid(),
             editable: true,
             style: 'classic',
@@ -117,170 +140,86 @@ class App extends Component {
             y: Math.min(window.innerHeight, 667)/2,
             scale: 1,
             rotate: 0,
-        }]);
+        };
+        this.props.selectElement(newElement);
+        this.props.openTextSettings();
+        this.textInput.current.focus();
+    }
 
-        this.setState({
-            linkSettingsActive: false,
-            backgroundSettingsActive: false,
-            textSettingsActive: true,
-            texts,
-            selectedText: texts.length - 1,
-        });
+    editText(text) {
+        this.props.selectElement(text);
+        this.props.openTextSettings();
         this.textInput.current.focus();
     }
 
 
     activeMenu() {
-        return !this.state.active || (this.state.linkSettingsActive || this.state.backgroundSettingsActive || this.state.textSettingsActive);
+        return !this.props.app.showMenu || (this.props.app.linkSettingsActive || this.props.app.backgroundSettingsActive || this.props.app.textSettingsActive);
     }
 
-    doneTextSettings(newText) {
-        let texts = this.state.texts;
-        let i = this.state.selectedText;
-        if (trim(newText.text).length > 0) {
-            texts[i] = newText;
-            texts[i].editable = false;
-            texts = texts.concat();
-        } else {
-            texts.splice(i, 1);
-            texts = texts.concat();
+    doneTextSettings(newElement) {
+        this.props.closeSettings();
+        this.props.selectElement(null);
+        let i=0;
+        let found = false;
+        for (i; i< this.props.story.elements.length; i++) {
+            let element = this.props.story.elements[i];
+            if(element.id == newElement.id) {
+                found = true;
+                break;
+            }
+
         }
-        this.setState({
-            linkSettingsActive: false,
-            backgroundSettingsActive: false,
-            textSettingsActive: false,
-            texts,
-            active: false,
-        });
+        if(found) {
+            if (trim(newElement.text).length > 0) {
+                this.props.udateElementAt(i, newElement);
+            } else {
+                this.props.removeElement(i);
+            }
+        } else {
+            if (trim(newElement.text).length > 0) {
+                this.props.addNewElement(newElement);
+            }
+        }
     }
-    deleteText(i) {
-        let texts = this.state.texts;
-        texts.splice(i, 1);
-        texts = texts.concat();
-        this.setState({
-            linkSettingsActive: false,
-            backgroundSettingsActive: false,
-            textSettingsActive: false,
-            texts,
-        });
-    }
-    doneBackgroundSettings() {
-        this.setState({
-            linkSettingsActive: false,
-            backgroundSettingsActive: false,
-            textSettingsActive: false,
-            active: false,
-        });
-    }
-
-    setBackgroundColor(hex) {
-        this.setState({
-            backgroundColor: hex,
-        });
-    }
-
-    setBackgroundImage(imageUrl) {
-        this.setState({
-            backgroundImage: imageUrl
-        });
-    }
-
-    removeBackgroundImage(imageUrl) {
-        this.setState({
-            backgroundImage: null
-        });
-    }
-
-    doneLinkSettings() {
-        this.setState({
-            linkSettingsActive: false,
-            backgroundSettingsActive: false,
-            textSettingsActive: false,
-            active: false,
-        });
-    }
-
-    dragStop(data) {
-
-        let texts = this.state.texts;
-        let i = this.state.selectedText;
-        let txt = texts[i];
-
-        txt = {
-            ...txt,
-            x: data.x,
-            y: data.y,
-            scale: data.scale,
-            rotate: data.rotate,
-        };
-        texts[i] = txt;
-        texts = texts.concat();
-        this.setState({
-            texts,
-        });
-    }
-    selectText(i) {
-        this.setState({
-            linkSettingsActive: false,
-            backgroundSettingsActive: false,
-            textSettingsActive: true,
-            selectedText: i,
-        });
-        this.textInput.current.focus();
-    }
-
-    onDragStart(i) {
-
-        let texts = this.state.texts;
-        let txt = texts[i];
-        texts.splice(i, 1);
-        texts.push(txt);
-        this.setState({
-            texts: texts.concat(),
-            selectedText: texts.length-1,
-        });
-    }
-
 
     render() {
-        let texts = this.state.texts.map((txt, i) => {
+        let elements = this.props.story.elements.map((txt, i) => {
             return (
                 <DraggableText key={`txt_${txt.id}`} {...txt}
-                    onDragStart={() => {this.onDragStart(i);}}
-                    onDragStop={(text) => {this.dragStop(text)}}
-                    onDelete={() => {this.deleteText(i)}}
-                    onSelect={() => {this.selectText(i)}} />
+                    selected={this.props.app.selectedElement ? (this.props.app.selectedElement.id === txt.id) : false }
+                    onDragStart={() => {
+                        this.props.selectElement(this.props.story.elements[i]);
+                        this.props.onDragStart(i);
+                    }}
+                    onDragStop={(text) => {this.props.udateElementAt(i, text)}}
+                    onDelete={() => {this.props.removeElement(i)}}
+                    onSelect={() => {this.editText(txt)}} />
             );
         });
         return (
             <div className="App">
                 <div className={`menu-top ${this.activeMenu() ? 'active-submenu' : ''}`}>
                     <div className={`menu-top__icons`}>
-                        <Toggle name="link" active={this.state.linkSettingsActive}
-                            onClick={this.toggleLink} />
-                        <Toggle name="image" active={this.state.backgroundSettingsActive}
-                            onClick={this.toggleBackground} />
-                        <Toggle name="font" active={this.state.textSettingsActive}
+                        <Toggle name="link" active={this.props.app.linkSettingsActive}
+                            onClick={this.props.openLinkSettings} />
+                        <Toggle name="image" active={this.props.app.backgroundSettingsActive}
+                            onClick={this.props.openBackgroundSettings} />
+                        <Toggle name="font" active={this.props.app.textSettingsActive}
                             onClick={this.toggleText} />
                     </div>
                 </div>
                 <div className="texts">
-                    {texts}
+                    {elements}
                 </div>
-                <PhonePreview {...this.state} onClick={() => {this.setState({active: !this.state.active})}} />
+                <PhonePreview onClick={() => {this.props.selectElement(null)} } />
                 <TextSettings
                     internalRef={this.textInput}
                     onDone={(text) => {this.doneTextSettings(text)}}
-                    active={this.state.textSettingsActive}
-                    currentText={this.state.texts[this.state.selectedText]} />
-                <BackgroundSettings
-                    active={this.state.backgroundSettingsActive}
-                    onDone={this.doneBackgroundSettings}
-                    onSetBackgroundColor={this.setBackgroundColor}
-                    onSetImage={this.setBackgroundImage}
-                    onDeleteImage={this.removeBackgroundImage} />
-
-                <LinkSettings active={this.state.linkSettingsActive} onDone={this.doneLinkSettings} />
+                    active={this.props.app.textSettingsActive}
+                    currentText={this.props.app.selectedElement} />
+                <BackgroundSettings />
+                <LinkSettings />
                 <div className={`menu-bottom ${this.activeMenu() ? 'active-submenu' : ''}`}>
                     <div className="menu-bottom__inner">
                         <button className="button finish">Publish
@@ -289,8 +228,47 @@ class App extends Component {
                     </div>
                 </div>
             </div>
-            );
+        );
     }
 }
 
-export default App;
+const mapStateToProps = (state, ownProps) => {
+    return state;
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+    openTextSettings: () => {
+        dispatch(openTextSettings());
+    },
+    openLinkSettings: () => {
+        dispatch(openLinkSettings());
+    },
+    openBackgroundSettings: () => {
+        dispatch(openBackgroundSettings());
+    },
+    closeSettings: () => {
+        dispatch(closeSettings());
+    },
+    tilt: (x,y) => {
+        dispatch(tilt(x,y));
+    },
+    onDragStart: (index) => {
+        dispatch(sortUp(index));
+    },
+    selectElement: (element) => {
+        dispatch(selectElement(element));
+    },
+    addNewElement: (element) => {
+        dispatch(addElement(element));
+    },
+    removeElement: (index) => {
+        dispatch(removeElement(index));
+    },
+    udateElementAt: (index, element) => {
+        let action = updateElement(element);
+        action.payload.index = index;
+        console.log(action);
+        dispatch(action);
+    }
+});
+export default connect(mapStateToProps, mapDispatchToProps)(App);

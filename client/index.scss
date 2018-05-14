@@ -215,6 +215,13 @@ body {
         user-select: none;
         padding: 2px;
         border-radius: 3px;
+        transition: text-shadow 0.2s ease-out;
+    }
+    &.selected {
+        .row {
+            border: 1px solid cyan;
+
+        }
     }
     &.deleted {
         transform: translate(-50%, -50%) scale(0.1, 0.1);
