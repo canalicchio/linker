@@ -11,28 +11,6 @@ import 'rc-slider/assets/index.css';
 import Textarea from "react-textarea-autosize";
 
 
-function setCaretPosition(elem, caretPos) {
-    elem = document.getElementById('text');
-    if(elem != null) {
-        if(elem.createTextRange) {
-            elem.focus();
-            var range = elem.createTextRange();
-            range.move('character', caretPos);
-            range.select();
-        }
-        else {
-            if(elem.selectionStart !== null) {
-                elem.focus();
-                elem.setSelectionRange(caretPos, caretPos);
-            }
-            else {
-                elem.focus();
-            }
-        }
-    }
-}
-
-
 class TextSettings extends Component {
     constructor(props) {
         super(props);
@@ -49,7 +27,6 @@ class TextSettings extends Component {
             align: 'center',
             fill: 'none',
             style: 'classic',
-            focus: false,
             fullWidth: Math.min(window.innerWidth, 375),
             fullHeight:  Math.min(window.innerHeight, 667),
         };
@@ -214,21 +191,6 @@ class TextSettings extends Component {
         this.props.onDone(this.state);
     }
 
-    getTextPosition() {
-
-        if(this.state.editable) {
-            return {
-                x: 0.5 * this.state.fullWidth,
-                y: 0.5 * this.state.fullHeight,
-            }
-        } else {
-            return {
-                x: this.state.x,
-                y: this.state.y,
-            }
-        }
-    }
-
     changeFontSize(value) {
         this.setState({
             fontSize: value
@@ -257,9 +219,6 @@ class TextSettings extends Component {
                     <Textarea inputRef={(txt) => {this.textInput.current = txt;}}
                         style={this.styleForTextArea()}
                         value={this.state.text}
-                        onClick={this.onFocus}
-                        onFocus={this.onFocus}
-                        onBlur={this.onBlur}
                         onChange={this.onChangeText} />
                 </div>
                 <div className={`font-size ${this.state.hoverFontSize ? 'hover' : ''}`}

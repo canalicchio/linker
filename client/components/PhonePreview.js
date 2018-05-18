@@ -1,27 +1,19 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux'
 
-
-class PhonePreview extends Component {
-
-    constructor(props) {
-        super(props);
-
-        this.onCliCkText = this.onClickText.bind(this);
-    }
-    onClickText(i) {
-        this.props.onSelectText(i);
-    }
-
-    render() {
-        return (
+const PhonePreview = (props) => {
+    return (
         <div className="phonebox" style={{
-            backgroundColor: this.props.backgroundColor,
-            backgroundImage: `url(${this.props.backgroundImage})`,
+            backgroundColor: props.story.backgroundColor,
+            backgroundImage: `url(${props.story.backgroundImage})`,
             }}
-            onClick={this.props.onClick}>
+            onClick={() => {props.onClick ? props.onClick() : null;}}>
         </div>
     );
-  }
 }
 
-export default PhonePreview;
+const mapStateToProps = (state, ownProps) => {
+    return state;
+};
+
+export default connect(mapStateToProps)(PhonePreview);

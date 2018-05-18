@@ -48,31 +48,21 @@ export const colorPalette = (selectColor) => {
         ]
     );
 }
-class ColorPicker extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.selectColor = this.selectColor.bind(this);
-    }
-    selectColor(color) {
-        this.props.onSelectColor(color);
-    }
-    render() {
-        var settings = {
-            dots: true,
-            speed: 500,
-            arrows: false,
-            slidesToShow: 1,
-            slidesToScroll: 1
-        };
-        let palette = colorPalette(this.selectColor);
-        return (
-            <div className="color-picker">
-                <Slider {...settings}>
-                    {palette}
-                </Slider>
-            </div>
-            );
-}
+const ColorPicker = (props) => {
+    var settings = {
+        dots: true,
+        speed: 500,
+        arrows: false,
+        slidesToShow: 1,
+        slidesToScroll: 1
+    };
+    let palette = colorPalette(props.onSelectColor);
+    return (
+        <div className="color-picker">
+            <Slider {...settings}>
+                {palette}
+            </Slider>
+        </div>
+    );
 }
 export default ColorPicker;
