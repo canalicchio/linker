@@ -30,16 +30,32 @@ module.exports = {
                 test: /\.js$/,
                 enforce: 'pre',
                 exclude: /node_modules/,
-                loader: require.resolve('eslint-loader'),
-                options: {
-                    formatter: eslintFormatter,
-                    eslintPath: require.resolve('eslint'),
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        'presets': [
+                            'react-native',
+                        ],
+                        'plugins': [
+                            'react-native-web'
+                        ],
+                    },
                 },
             },
             {
                 test: /\.jsx?$/,
                 exclude: /node_modules/,
-                use: "babel-loader"
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        'presets': [
+                            'react-native',
+                        ],
+                        'plugins': [
+                            'react-native-web'
+                        ],
+                    },
+                },
             },
             {
                 oneOf: [
@@ -108,6 +124,12 @@ module.exports = {
                 ]
             }
         ]
+    },
+    resolve: {
+        extensions: ['.web.js', '.js', '.json', '.web.jsx', '.jsx'],
+        alias: {
+            'react-native': 'react-native-web'
+        }
     },
     plugins: [
         new webpack.LoaderOptionsPlugin({ options: {

@@ -1,12 +1,18 @@
+import { AppRegistry } from 'react-native';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.scss';
-import App from './App';
 import { Provider } from 'react-redux'
+import './web.scss';
 
 import store from './store';
+import App from './App';
 
-ReactDOM.render(
-    <Provider store={store}>
-        <App />
-    </Provider>, document.getElementById('root'));
+const NativeApp = () => (
+     (
+         <Provider store={store}>
+            <App />
+        </Provider>
+    )
+);
+
+AppRegistry.registerComponent('App', () => NativeApp);
+AppRegistry.runApplication('App', { rootTag: document.getElementById('root') });

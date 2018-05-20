@@ -10,7 +10,7 @@ import index from './routes/index';
 import * as WebpackDevServer from 'webpack-dev-server';
 // import * as WebpackDevServerMiddleWare from 'webpack-dev-middleware';
 import * as webpack from 'webpack';
-import * as config from '../webpack.config.js';
+import * as config from '../webpack.config.web.js';
 
 console.log(config);
 
