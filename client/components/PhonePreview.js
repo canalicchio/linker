@@ -1,14 +1,19 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { Text, View, TouchableHighlight } from 'react-native';
 import { connect } from 'react-redux'
 
 const PhonePreview = (props) => {
     return (
-        <div className="phonebox" style={{
-            backgroundColor: props.story.backgroundColor,
-            backgroundImage: `url(${props.story.backgroundImage})`,
+        <View className="phonebox" style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                height: '100%',
+                width: '100%',
+                backgroundColor: props.story.backgroundColor,
             }}
             onClick={() => {props.onClick ? props.onClick() : null;}}>
-        </div>
+        </View>
     );
 }
 

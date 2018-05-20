@@ -1,19 +1,24 @@
 import React, { Component } from 'react';
+import { Text, View, TouchableHighlight, StyleSheet, Animated} from 'react-native';
 import { connect } from 'react-redux';
-import 'react-images-uploader/styles.css';
+import Icon from 'react-native-vector-icons/FontAwesome';
+//  import 'react-images-uploader/styles.css';
+import { Button } from 'react-native-elements';
 
 import PhonePreview from './components/PhonePreview';
 import Toggle from './components/Toggle';
 import TextSettings from './components/TextSettings';
-import LinkSettings from './components/LinkSettings';
+//  import LinkSettings from './components/LinkSettings';
 import BackgroundSettings from './components/BackgroundSettings';
-import DraggableText from './components/DraggableText';
-import FA from '@fortawesome/react-fontawesome';
+//  import DraggableText from './components/DraggableText';
+//  import Fa from '@fortawesome/react-fontawesome';
+
+//import Icon from './components/Icon';
+import Gestures from './components/Gestures';
 
 import throttle from 'lodash.throttle';
+
 import fontawesome from '@fortawesome/fontawesome';
-
-
 import faLink from '@fortawesome/fontawesome-free-solid/faLink';
 import faImage from '@fortawesome/fontawesome-free-solid/faImage';
 import faFont from '@fortawesome/fontawesome-free-solid/faFont';
@@ -71,27 +76,141 @@ function guid() {
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 }
 
+const styles = StyleSheet.create({
+    menuTop: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: 70,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        zIndex: 3,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    menuBottom: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        width: '100%',
+        height: 60,
+        zIndex: 4,
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+    },
+    phonePreview: {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%',
+    },
+    publishButton: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginHorizontal: 5,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255,255,255,0.5)',
+        minWidth: 140,
+        minHeight: 40,
+        shadowColor: '#888888',
+        shadowOffset: {
+            width: -2,
+            height: 2,
+        },
+        shadowRadius: 3,
+        shadowOpacity: 0.7,
+    },
+    publishButtonText: {
+        flex: 0,
+        minHeight: 20,
+        flexGrow: 0,
+        flexShrink: 0,
+        color: '#888888',
+        fontWeight: '800',
+        marginHorizontal: 5,
+    },
+    publishButtonIcon: {
+        flex: 0,
+        minWidth: 20,
+        minHeight: 20,
+        flexGrow: 0,
+        color: '#888888'
+    }
+});
+
+const fontSizes = {
+  articleHeadline: 45,
+  articleMeta: 15,
+  body: 18,
+  bodyMobile: 17,
+  caption: 13,
+  cardHeadline: 27,
+  cardMeta: 13,
+  cardMetaMobile: 12,
+  credits: 9,
+  headline: 30,
+  leadHeadline: 35,
+  link: 13,
+  meta: 14,
+  pageComponentHeadline: 25,
+  pageHeadline: 40,
+  pagingMeta: 15,
+  puffLink: 11,
+  secondary: 16,
+  sliceHeadline: 32,
+  smallestHeadline: 20,
+  smallHeadline: 22,
+  teaser: 14,
+  tertiary: 15
+};
+
+const gestureStyle = StyleSheet.create({
+  gestures: {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%',
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 200
+  },
+  box: {
+    width: 200,
+    height: 200,
+    backgroundColor: "red"
+  },
+  row: {
+    flex: 1
+  },
+  north: {
+    alignItems: "center",
+    justifyContent: "flex-start"
+  },
+  ew: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  south: {
+    alignItems: "center",
+    justifyContent: "flex-end"
+  },
+  text: {
+    color: "yellow",
+    fontSize: fontSizes.smallestHeadline,
+    padding: 5
+  }
+});
 class App extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            story: {
-                backgroundColor: '#ffffff',
-                backgroundImage: null,
-                elements: [],
-            },
-            app: {
-                linkSettingsActive: false,
-                backgroundSettingsActive: false,
-                textSettingsActive: false,
-                showMenu: true,
-                selectedElement: null,
-            },
-            device: {
-                tiltX: 0,
-                tiltY: 0,
-            }
         };
         this.toggleText = this.toggleText.bind(this);
         this.editText = this.editText.bind(this);
@@ -102,32 +221,32 @@ class App extends Component {
 
 
         this.tilt = throttle((event) => {
-            if(this.state.textSettingsActive == false && event.accelerationIncludingGravity) {
-                let x = parseFloat(event.accelerationIncludingGravity.x);
-                let y = parseFloat(event.accelerationIncludingGravity.y);
+            if(this.props.app.textSettingsActive === false && event.accelerationIncludingGravity) {
+                const x = parseFloat(event.accelerationIncludingGravity.x);
+                const y = parseFloat(event.accelerationIncludingGravity.y);
                 this.props.tilt(( this.state.tiltX + x ) / 2, (this.state.tiltY + y ) / 2);
             }
         }, 20);
     }
     componentDidMount() {
-        document.querySelector('.rc-slider-handle').addEventListener('touchmove', function(ev){
-            ev.preventDefault();
-        });
-        document.querySelector('.rc-slider-track').addEventListener('touchmove', function(ev){
-            ev.preventDefault();
-        });
-        document.querySelector('.rc-slider-mark').addEventListener('touchmove', function(ev){
-            ev.preventDefault();
-        });
-        document.querySelector('.rc-slider-rail').addEventListener('touchmove', function(ev){
-            ev.preventDefault();
-        });
+        //  document.querySelector('.rc-slider-handle').addEventListener('touchmove', (ev) => {
+        //      ev.preventDefault();
+        //  });
+        //  document.querySelector('.rc-slider-track').addEventListener('touchmove', (ev) => {
+        //      ev.preventDefault();
+        //  });
+        //  document.querySelector('.rc-slider-mark').addEventListener('touchmove', (ev) => {
+        //      ev.preventDefault();
+        //  });
+        //  document.querySelector('.rc-slider-rail').addEventListener('touchmove', (ev) => {
+        //      ev.preventDefault();
+        //  });
 
-        window.addEventListener('devicemotion', this.tilt, true);
+        //  window.addEventListener('devicemotion', this.tilt, true);
     }
 
     toggleText() {
-        let newElement = {
+        const newElement = {
             id: guid(),
             editable: true,
             style: 'classic',
@@ -143,13 +262,17 @@ class App extends Component {
         };
         this.props.selectElement(newElement);
         this.props.openTextSettings();
-        this.textInput.current.focus();
+        if(this.textInput.current) {
+            this.textInput.current.focus();
+        }
     }
 
     editText(text) {
         this.props.selectElement(text);
         this.props.openTextSettings();
-        this.textInput.current.focus();
+        if(this.textInput.current) {
+            this.textInput.current.focus();
+        }
     }
 
 
@@ -163,78 +286,70 @@ class App extends Component {
         let i=0;
         let found = false;
         for (i; i< this.props.story.elements.length; i++) {
-            let element = this.props.story.elements[i];
-            if(element.id == newElement.id) {
+            const element = this.props.story.elements[i];
+            if(element.id === newElement.id) {
                 found = true;
                 break;
             }
 
         }
-        if(found) {
-            if (trim(newElement.text).length > 0) {
-                this.props.udateElementAt(i, newElement);
-            } else {
-                this.props.removeElement(i);
-            }
-        } else {
-            if (trim(newElement.text).length > 0) {
-                this.props.addNewElement(newElement);
-            }
+        if(found && trim(newElement.text).length > 0) {
+            this.props.udateElementAt(i, newElement);
+        } else if(found && trim(newElement.text).length === 0) {
+            this.props.removeElement(i);
+        } else if (found === false && trim(newElement.text).length > 0) {
+            this.props.addNewElement(newElement);
         }
     }
 
     render() {
-        let elements = this.props.story.elements.map((txt, i) => {
-            return (
-                <DraggableText key={`txt_${txt.id}`} {...txt}
-                    selected={this.props.app.selectedElement ? (this.props.app.selectedElement.id === txt.id) : false }
-                    onDragStart={() => {
-                        this.props.selectElement(this.props.story.elements[i]);
-                        this.props.onDragStart(i);
-                    }}
-                    onDragStop={(text) => {this.props.udateElementAt(i, text)}}
-                    onDelete={() => {this.props.removeElement(i)}}
-                    onSelect={() => {this.editText(txt)}} />
-            );
-        });
+        //    const elements = this.props.story.elements.map((txt, i) => (
+        //        (
+        //            <DraggableText key={`txt_${txt.id}`} {...txt}
+        //                selected={this.props.app.selectedElement ? (this.props.app.selectedElement.id === txt.id) : false }
+        //                onDragStart={() => {
+        //                    this.props.selectElement(this.props.story.elements[i]);
+        //                    this.props.onDragStart(i);
+        //                }}
+        //                onDragStop={(text) => {this.props.udateElementAt(i, text)}}
+        //                onDelete={() => {this.props.removeElement(i)}}
+        //                onSelect={() => {this.editText(txt)}} />
+        //        )
+        //    ));
         return (
-            <div className="App">
-                <div className={`menu-top ${this.activeMenu() ? 'active-submenu' : ''}`}>
-                    <div className={`menu-top__icons`}>
-                        <Toggle name="link" active={this.props.app.linkSettingsActive}
-                            onClick={this.props.openLinkSettings} />
-                        <Toggle name="image" active={this.props.app.backgroundSettingsActive}
-                            onClick={this.props.openBackgroundSettings} />
-                        <Toggle name="font" active={this.props.app.textSettingsActive}
-                            onClick={this.toggleText} />
-                    </div>
-                </div>
-                <div className="texts">
-                    {elements}
-                </div>
-                <PhonePreview onClick={() => {this.props.selectElement(null)} } />
-                <TextSettings
-                    internalRef={this.textInput}
-                    onDone={(text) => {this.doneTextSettings(text)}}
-                    active={this.props.app.textSettingsActive}
-                    currentText={this.props.app.selectedElement} />
-                <BackgroundSettings />
-                <LinkSettings />
-                <div className={`menu-bottom ${this.activeMenu() ? 'active-submenu' : ''}`}>
-                    <div className="menu-bottom__inner">
-                        <button className="button finish">Publish
-                            <FA icon="angle-right" size="lg" />
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <View className="App" style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: 375,
+                height: 667,
+                }}>
+                <View className={`menu-top ${this.activeMenu() ? 'active-submenu' : ''}`} style={styles.menuTop}>
+                    <Toggle name="link" active={this.props.app.linkSettingsActive}
+                        onClick={this.props.openLinkSettings} color="#ffffff" />
+                    <Toggle name="image" active={this.props.app.backgroundSettingsActive}
+                        onClick={this.props.openBackgroundSettings} color="#ffffff" />
+                    <Toggle name="font" active={this.props.app.textSettingsActive}
+                        onClick={this.toggleText} color="#ffffff" />
+                </View>
+                { this.props.app.backgroundSettingsActive ? (<BackgroundSettings />) : null }
+                { this.props.app.textSettingsActive ? (<TextSettings />) : null }
+                <PhonePreview style={styles.phonePreview} />
+                <Gestures style={gestureStyle.gestures}>
+                    <Text>Hello World</Text>
+                </Gestures>
+                <View className={`menu-bottom ${this.activeMenu() ? 'active-submenu' : ''}`} style={styles.menuBottom}>
+                    <View style={styles.publishButton}>
+                        <Text style={styles.publishButtonText}>Publish</Text>
+                            <Icon name="chevron-right" size={20} color="#888888" />
+                    </View>
+                </View>
+            </View>
         );
     }
 }
 
-const mapStateToProps = (state, ownProps) => {
-    return state;
-};
+const mapStateToProps = (state, ownProps) => state;
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
     openTextSettings: () => {
@@ -265,9 +380,8 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
         dispatch(removeElement(index));
     },
     udateElementAt: (index, element) => {
-        let action = updateElement(element);
+        const action = updateElement(element);
         action.payload.index = index;
-        console.log(action);
         dispatch(action);
     }
 });

@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { Text, View, TouchableHighlight, StyleSheet} from 'react-native';
 
-import ImagesUploader from 'react-images-uploader';
-import ColorPicker from './ColorPicker';
+
+// import ImagesUploader from 'react-images-uploader';
 import {colorPalette} from './ColorPicker';
 
 import {
@@ -13,6 +14,60 @@ import {
 import {
     closeSettings,
 } from '../reducers/app';
+
+const styles = StyleSheet.create({
+    menuTop: {
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: 70,
+        zIndex: 3,
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+    },
+    pageTitle: {
+        fontSize: 20,
+        fontWeight: '800',
+        color: '#ffffff',
+        textAlign: 'center',
+    },
+    menuTopText: {
+        color: '#ffffff',
+        marginHorizontal: 15,
+    },
+    backgroundSettings: {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 3,
+        backgroundColor: 'rgba(0,0,0, 0.5)',
+    },
+    colorsPalette: {
+        marginHorizontal: 40,
+        marginVertical: 30,
+    },
+    colorPaletteContainer: {
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignContent: 'center',
+        flexWrap: 'wrap',
+        flexDirection: 'row',
+    },
+    colorPickStyle: {
+        width: 45,
+        height: 45,
+        borderRadius: 25,
+        borderWidth: 4,
+        borderColor: '#ffffff',
+        marginVertical: 6,
+        marginHorizontal: 4,
+    },
+});
+
 
 class BackgroundSettings extends Component {
     constructor(props) {
@@ -29,30 +84,29 @@ class BackgroundSettings extends Component {
         }
     }
     render() {
-        let palette = colorPalette(this.props.setBackgroundColor);
+        let palette = colorPalette({
+            selectColor: this.props.setBackgroundColor,
+            containerStyle: styles.colorPaletteContainer,
+            colorPickStyle: styles.colorPickStyle,
+        });
         return (
-            <div className={`settings settings--background ${this.props.app.backgroundSettingsActive ? 'active' : ''}`}>
-                <div className={`menu-top`}>
-                    <div className="menu-top__inner">
-                        <button className="done" onClick={this.props.closeSettings}>Done</button>
-                    </div>
-                </div>
-                <div className="background-color">
-                    <label>Background color</label>
-                    <div>
+            <View className={`settings settings--background ${this.props.app.backgroundSettingsActive ? 'active' : ''}`} style={styles.backgroundSettings}>
+                <View className={`menu-top`} style={styles.menuTop}>
+                    <View className="menu-top__inner">
+                        <TouchableHighlight className="done" onPress={this.props.closeSettings}>
+                            <Text style={styles.menuTopText}>Done</Text>
+                        </TouchableHighlight>
+                    </View>
+                </View>
+                <View>
+                    <Text style={styles.pageTitle}>Background colors</Text>
+                    <View style={styles.colorsPalette}>
                         {palette}
-                    </div>
-                </div>
-                <div className="image-upload">
-                    <ImagesUploader
-                        url="/api/image"
-                        optimisticPreviews
-                        multiple={false}
-                        onLoadEnd={this.handleImageLoad}
-                        deleteImage={this.props.deleteBackgroundImage}
-                        label="Upload a picture" />
-                </div>
-            </div>
+                    </View>
+                </View>
+                <View className="image-upload">
+                </View>
+            </View>
         );
   }
 }
