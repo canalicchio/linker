@@ -9,10 +9,10 @@ const styles = StyleSheet.create({
     }
 });
 
-const Toggle = ({active, onClick, name, color, size=30}) => (
+const Toggle = ({active, onClick, name, color, iconStyle, size=30}) => (
     (
       <TouchableOpacity className={`toggle ${active ? 'active' : ''}`} onPress={onClick} style={styles.Toggle}>
-          <Icon name={name} size={size} color={color} />
+          <Icon name={name} size={size} color={color} style={iconStyle} />
       </TouchableOpacity>
     )
 )

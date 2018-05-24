@@ -5,7 +5,6 @@ import { Text, View, Button, TouchableOpacity } from 'react-native';
 import Carousel from './Carousel';
 
 export const ColorPick = ({onSelect, color, style}) => {
-    console.log(style);
     return (
         <TouchableOpacity className="color-pick" color={color}
             style={[
@@ -72,9 +71,9 @@ const ColorPicker = (props) => {
         colorPickStyle: props.colorPickStyle,
     });
     return (
-        <View className="color-picker">
+        <Carousel className="color-picker">
             {palette}
-        </View>
+        </Carousel>
     );
 }
 export default ColorPicker;

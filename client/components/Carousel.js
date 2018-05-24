@@ -18,7 +18,7 @@ import {
   Dimensions
 } from 'react-native';
 
-const window = Dimensions.get('window');
+const window = {width: 0};
 
 
 
@@ -35,11 +35,13 @@ const IndicatorsStyle = StyleSheet.create({
         paddingBottom: 20
     },
     Item: {
-        borderWidth:5,
+        borderWidth: 5,
         borderColor: '#fff',
         borderRadius: 5,
         marginRight: 6,
-        marginLeft: 6
+        marginLeft: 6,
+        width: 10,
+        height: 10
     },
     Selected: {
         width: 10,
@@ -66,12 +68,8 @@ class SwipeCarousel extends Component {
 
         //Number of pages
         this._pages = (this.props.children) ? this.props.children.length : 0;
-        //Position Limit Left
-        this._limitLeft = (window.width * (this._pages - 1) ) * -1;
         //Position Limit Right
         this._limitRight = 0;
-        //Size of drag to change page
-        this._drag = window.width / 2;
         //Save the previous position
         this._previousPosition = 0;
         //Pan Responser for touch
@@ -98,6 +96,13 @@ class SwipeCarousel extends Component {
             Pages: null,
             Indicators: null
         };
+    }
+    initWidth(width) {
+
+
+        window.width = width;
+        this._limitLeft = (window.width * (this._pages - 1) ) * -1;
+        this._drag = window.width / 2;
 
     }
 
@@ -164,6 +169,7 @@ class SwipeCarousel extends Component {
       * @param  {[type]} current = this.state.current [description]
       */
      moveTo(current = this.state.current){
+         debugger;
          this._previousPosition = ((current * window.width) - window.width) * -1;
          this.setPositionAnimated(this._previousPosition);
      }
@@ -377,6 +383,7 @@ class SwipeCarousel extends Component {
             width: Math.abs(event.nativeEvent.layout.width),
             height: Math.abs(event.nativeEvent.layout.height)
         });
+        this.initWidth(Math.abs(event.nativeEvent.layout.width));
     }
 
     /**

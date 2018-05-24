@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, TouchableHighlight, StyleSheet, Animated} from 'react-native';
+import { Text, View, TouchableHighlight, StyleSheet, Animated, Dimensions} from 'react-native';
 import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 //  import 'react-images-uploader/styles.css';
@@ -10,6 +10,7 @@ import Toggle from './components/Toggle';
 import TextSettings from './components/TextSettings';
 //  import LinkSettings from './components/LinkSettings';
 import BackgroundSettings from './components/BackgroundSettings';
+import TextElement from './components/TextElement';
 //  import DraggableText from './components/DraggableText';
 //  import Fa from '@fortawesome/react-fontawesome';
 
@@ -19,14 +20,6 @@ import Gestures from './components/Gestures';
 import throttle from 'lodash.throttle';
 
 import fontawesome from '@fortawesome/fontawesome';
-import faLink from '@fortawesome/fontawesome-free-solid/faLink';
-import faImage from '@fortawesome/fontawesome-free-solid/faImage';
-import faFont from '@fortawesome/fontawesome-free-solid/faFont';
-import faArrow from '@fortawesome/fontawesome-free-solid/faAngleRight';
-import faALeft from '@fortawesome/fontawesome-free-solid/faAlignLeft';
-import faACenter from '@fortawesome/fontawesome-free-solid/faAlignCenter';
-import faARight from '@fortawesome/fontawesome-free-solid/faAlignRight';
-import faATrash from '@fortawesome/fontawesome-free-solid/faTrashAlt';
 
 
 import {
@@ -52,17 +45,6 @@ import {
 } from './reducers/element';
 
 
-fontawesome.library.add(
-    faLink,
-    faImage,
-    faFont,
-    faArrow,
-    faALeft,
-    faACenter,
-    faARight,
-    faATrash
-);
-
 function trim(string) {
     return String(string).replace(/^\s+|\s+$/g, '');
 }
@@ -83,11 +65,15 @@ const styles = StyleSheet.create({
         left: 0,
         width: '100%',
         height: 70,
-        backgroundColor: 'rgba(0,0,0,0.5)',
         zIndex: 3,
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    menuTopIcon: {
+        color: '#000',
+        textShadowColor: "#333",
+        textShadowRadius: 3,
     },
     menuBottom: {
         position: 'absolute',
@@ -142,70 +128,6 @@ const styles = StyleSheet.create({
     }
 });
 
-const fontSizes = {
-  articleHeadline: 45,
-  articleMeta: 15,
-  body: 18,
-  bodyMobile: 17,
-  caption: 13,
-  cardHeadline: 27,
-  cardMeta: 13,
-  cardMetaMobile: 12,
-  credits: 9,
-  headline: 30,
-  leadHeadline: 35,
-  link: 13,
-  meta: 14,
-  pageComponentHeadline: 25,
-  pageHeadline: 40,
-  pagingMeta: 15,
-  puffLink: 11,
-  secondary: 16,
-  sliceHeadline: 32,
-  smallestHeadline: 20,
-  smallHeadline: 22,
-  teaser: 14,
-  tertiary: 15
-};
-
-const gestureStyle = StyleSheet.create({
-  gestures: {
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        width: '100%',
-        height: '100%',
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 200
-  },
-  box: {
-    width: 200,
-    height: 200,
-    backgroundColor: "red"
-  },
-  row: {
-    flex: 1
-  },
-  north: {
-    alignItems: "center",
-    justifyContent: "flex-start"
-  },
-  ew: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center"
-  },
-  south: {
-    alignItems: "center",
-    justifyContent: "flex-end"
-  },
-  text: {
-    color: "yellow",
-    fontSize: fontSizes.smallestHeadline,
-    padding: 5
-  }
-});
 class App extends Component {
     constructor(props) {
         super(props);
@@ -245,26 +167,29 @@ class App extends Component {
         //  window.addEventListener('devicemotion', this.tilt, true);
     }
 
-    toggleText() {
-        const newElement = {
-            id: guid(),
-            editable: true,
-            style: 'classic',
-            fill: 'none',
-            align: 'center',
-            fontSize: 2.0,
-            color: '#000',
-            text: '',
-            x: Math.min(window.innerWidth, 375)/2,
-            y: Math.min(window.innerHeight, 667)/2,
-            scale: 1,
-            rotate: 0,
-        };
-        this.props.selectElement(newElement);
-        this.props.openTextSettings();
-        if(this.textInput.current) {
-            this.textInput.current.focus();
+    toggleText(newElement) {
+        if(!newElement) {
+            newElement = {
+                id: guid(),
+                editable: true,
+                style: 'classic',
+                fill: 'none',
+                align: 'center',
+                fontSize: 30,
+                color: '#000',
+                text: '',
+                x: Math.min(window.innerWidth, 375)/2,
+                y: Math.min(window.innerHeight, 667)/2,
+                scale: 1,
+                rotate: 0,
+            };
+            this.props.addNewElement(newElement);
         }
+        //this.props.selectElement(newElement);
+        //this.props.openTextSettings();
+        //if(this.textInput.current) {
+        //    this.textInput.current.focus();
+        //}
     }
 
     editText(text) {
@@ -326,18 +251,30 @@ class App extends Component {
                 }}>
                 <View className={`menu-top ${this.activeMenu() ? 'active-submenu' : ''}`} style={styles.menuTop}>
                     <Toggle name="link" active={this.props.app.linkSettingsActive}
-                        onClick={this.props.openLinkSettings} color="#ffffff" />
+                        iconStyle={styles.menuTopIcon}
+                        onClick={this.props.openLinkSettings} color="#000000" />
                     <Toggle name="image" active={this.props.app.backgroundSettingsActive}
-                        onClick={this.props.openBackgroundSettings} color="#ffffff" />
+                        iconStyle={styles.menuTopIcon}
+                        onClick={this.props.openBackgroundSettings} color="#000000" />
                     <Toggle name="font" active={this.props.app.textSettingsActive}
-                        onClick={this.toggleText} color="#ffffff" />
+                        iconStyle={styles.menuTopIcon}
+                        onClick={() => {this.toggleText()}} color="#000000" />
                 </View>
                 { this.props.app.backgroundSettingsActive ? (<BackgroundSettings />) : null }
                 { this.props.app.textSettingsActive ? (<TextSettings />) : null }
                 <PhonePreview style={styles.phonePreview} />
-                <Gestures style={gestureStyle.gestures}>
-                    <Text>Hello World</Text>
-                </Gestures>
+                <View style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    width: '100%',
+                    height: '100%',
+                    }}>
+                {this.props.story.elements.map((el, i) => {
+                console.log(el);
+                return (<TextElement key={el.id}  index={i} element={el} onClick={()=>{ this.toggleText(el)}} />)
+                })}
+                </View>
                 <View className={`menu-bottom ${this.activeMenu() ? 'active-submenu' : ''}`} style={styles.menuBottom}>
                     <View style={styles.publishButton}>
                         <Text style={styles.publishButtonText}>Publish</Text>

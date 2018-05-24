@@ -33,7 +33,6 @@ class Gestures extends Component {
             pan: new Animated.ValueXY(),
         };
     }
-
     componentWillMount() {
         const animateMapping = Animated.event([{ dx: this.state.pan.x, dy: this.state.pan.y }]);
         this.panResponder = PanResponder.create({
@@ -44,16 +43,23 @@ class Gestures extends Component {
                 onPanResponderStart: evt => {
                 this.handlePinchStart(evt);
             },
-            onPanResponderMove: ( evt, gesture ) => {
-                animateMapping(gesture);
+            onPanResponderMove: ( evt, gestureState ) => {
+                animateMapping(gestureState);
                 this.handlePinchChange(evt);
             },
-            onPanResponderRelease: () => {
-                Animated.parallel([
-                    Animated.spring(this.state.zoomRatio, { toValue: 1 }),
-                    Animated.spring(this.state.angle, { toValue: 0 }),
-                    Animated.spring(this.state.pan, { toValue: 0 }),
-                ]).start();
+            onPanResponderRelease: (evt, gestureState) => {
+                console.log(this.state.pan.x._value, this.state.pan.y._value);
+                if(Math.abs(gestureState.moveX) - 2 < 0 && Math.abs(gestureState.moveY) - 2) {
+                    console.log('press');
+                }
+                if(this.props.onGestureStop) {
+                    this.props.onGestureStop(this.state.pan.x._value, this.state.pan.y._value);
+                }
+
+                //                this.state.zoomRatio.setValue(1);
+                //                this.state.angle.setValue(1);
+                this.state.pan.x.setValue(0);
+                this.state.pan.y.setValue(0);
             }
         });
     }
@@ -99,22 +105,16 @@ class Gestures extends Component {
 
         return (
             <View style={{ flexGrow: 1 }} {...this.panResponder.panHandlers}>
-                <TouchableWithoutFeedback>
-                    <View {...this.props}>
-                        <Animated.View style={panTransform}>
-                            <Animated.View style={transformStyle}>
-                                {this.props.children}
-                            </Animated.View>
+                <View {...this.props}>
+                    <Animated.View style={panTransform}>
+                        <Animated.View style={transformStyle}>
+                            {this.props.children}
                         </Animated.View>
-                    </View>
-                </TouchableWithoutFeedback>
+                    </Animated.View>
+                </View>
             </View>
             );
   }
 }
-
-Gestures.propTypes = {
-    children: PropTypes.element.isRequired
-};
 
 export default Gestures;

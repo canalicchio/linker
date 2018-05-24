@@ -1,5 +1,8 @@
 import elementReducer from './element'
 
+const UPDATE_ELEMENT = 'element/UPDATE';
+
+
 const INITIAL_STATE = [];
 
 const elementCollectionReducer = (state = INITIAL_STATE, action) => {

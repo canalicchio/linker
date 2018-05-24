@@ -2,7 +2,7 @@
     font-family:FontAwesome;
     font-style:normal;
     font-weight:400;
-    src:url(/webfonts/FontAwesome.b06871f2.ttf) format("truetype")
+    src:url(/webfonts/fa-solid-900.ttf) format("truetype")
 }
 body, html {
     position: relative;
@@ -34,6 +34,9 @@ body {
     height: 100%;
     transform: translateZ(0);
 }
+textarea {
+    outline: 'none';
+}
 @media (min-width:376px) {
     body, html {
         width: 100%;
@@ -60,4 +63,24 @@ body {
     }
 
 }
+textarea.transparent {
+    color: rgb(56, 151, 241);
+    -webkit-text-fill-color: transparent;
+}
 
+textarea:hover,
+input:hover,
+textarea:active,
+input:active,
+textarea:focus,
+input:focus,
+button:focus,
+button:active,
+button:hover,
+label:focus,
+.btn:active,
+.btn.active
+{
+    outline:0px !important;
+    -webkit-appearance:none;
+}
