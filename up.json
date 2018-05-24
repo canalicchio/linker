@@ -1,0 +1,26 @@
+{
+  "name": "linker",
+  "static": {
+    "dir": "app/static"
+  },
+  "profile": "linker",
+  "regions": ["eu-west-1"],
+  "logs": {
+    "stdout": "info",
+    "stderr": "info"
+  },
+  "proxy": {
+    "timeout": 25,
+    "listen_timeout": 25
+  },
+  "stages": {
+    "development": {
+      "lambda": {
+        "warm": false,
+        "memory": 128,
+        "runtime": "nodejs8.10",
+        "accelerate": true
+      }
+    }
+  }
+}
