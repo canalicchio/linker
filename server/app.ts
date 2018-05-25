@@ -7,12 +7,7 @@ import * as logger from 'morgan';
 import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
 import index from './routes/index';
-import * as WebpackDevServer from 'webpack-dev-server';
 // import * as WebpackDevServerMiddleWare from 'webpack-dev-middleware';
-import * as webpack from 'webpack';
-import * as config from '../webpack.config.js';
-
-console.log(config);
 
 const app: express.Express = express();
 
@@ -38,6 +33,12 @@ app.use('/api/',index);
 
 
 if(process.env.NODE_ENV === 'development') {
+    const WebpackDevServer = require('webpack-dev-server');
+    const webpack = require('webpack');
+    const config = require('../webpack.config.js');
+    //    import * as WebpackDevServer from 'webpack-dev-server';
+    //import * as webpack from 'webpack';
+    //import * as config from '../webpack.config.js';
     //
     // when in development mode we run a webpack server on port 3001 and
     // all the express calls will be proxied through this server
